@@ -4,6 +4,7 @@ AI-powered shopping assistant with RAG, sentiment analysis, and Streamlit UI
 Once cloned, run these commands in the root folder:
 # Create virtual environment (for windows vscode)
 python -m venv venv
+
 venv\Scripts\activate
 
 # Install dependencies

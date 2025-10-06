@@ -13,6 +13,7 @@ df = pd.read_csv(INPUT, dtype={1: str, 10: str})
 df = df.rename(columns=lambda x: x.strip())
 #print('after')
 #print(df.columns.tolist())
+product_id_col="id"
 product_col = "name"  
 review_col = "reviews.text"  
 rating_col = "reviews.rating"  
@@ -30,7 +31,8 @@ for prod, group in df.groupby(product_col):
     combined = " ".join(sample_reviews)
     category_val = group[category_col].iloc[0] if category_col in group.columns else ""
     summary_text = f"Product: {prod}\nCategories: {category_val}\n\nTop reviews:\n{combined}"
-    prod_id = hashlib.md5(prod.encode("utf-8")).hexdigest()[:12]
+    #prod_id = hashlib.md5(prod.encode("utf-8")).hexdigest()[:12]
+    prod_id = group[product_id_col].iloc[0]
     docs.append({"product_id": prod_id, "product_name": prod, "text": summary_text})
 
 products_df = pd.DataFrame(docs)
@@ -43,12 +45,13 @@ print(f"Saved product docs: {OUT_DIR/'products.csv'}")
 rows = []
 for _, r in df.iterrows():
     prod = r[product_col]
-    prod_id = hashlib.md5(str(prod).encode("utf-8")).hexdigest()[:12]
+    #prod_id = hashlib.md5(str(prod).encode("utf-8")).hexdigest()[:12]
+    prod_id = r[product_id_col]
     text = str(r.get(review_col, "")).strip()
     rating = r.get(rating_col, None)
     if text:
         rows.append({"product_id": prod_id, "product_name": prod, "review_text": text, "rating": rating})
         
 reviews_df = pd.DataFrame(rows)
-reviews_df.to_csv(OUT_DIR/"reviews_snippets.csv", index=False)
-print(f"Saved review snippets: {OUT_DIR/'reviews_snippets.csv'}")
+reviews_df.to_csv(OUT_DIR/"reviews.csv", index=False)
+print(f"Saved review snippets: {OUT_DIR/'reviews.csv'}")

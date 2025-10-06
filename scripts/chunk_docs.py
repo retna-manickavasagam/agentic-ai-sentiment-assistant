@@ -5,7 +5,7 @@ from pathlib import Path
 
 in_products = "data/processed/products.csv"
 out_chunks = Path("data/processed/chunked_products.csv")
-in_reviews = "data/processed/reviews_snippets.csv"
+in_reviews = "data/processed/reviews.csv"
 out_review_chunks = Path("data/processed/chunked_reviews.csv")
 
 df = pd.read_csv(in_products)

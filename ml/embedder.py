@@ -21,11 +21,11 @@ product_store = Chroma.from_texts(
     texts=texts,
     embedding=emb,
     metadatas=metas,
-    collection_name="product_docs",
+    collection_name="products",
     persist_directory=persist_dir
 )
 
-print("Persisted product_docs collection.")
+print("Persisted products collection.")
 
 # 2) index  chunk reviews
 reviews = pd.read_csv("data/processed/chunked_reviews.csv")
@@ -36,8 +36,8 @@ review_store = Chroma.from_texts(
     texts=texts2,
     embedding=emb,
     metadatas=metas2,
-    collection_name="review_snippets",
+    collection_name="reviews",
     persist_directory=persist_dir
 )
 
-print("Persisted review_snippets collection.")
+print("Persisted reviews collection.")

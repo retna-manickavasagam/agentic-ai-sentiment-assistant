@@ -1,0 +1,13 @@
+fastapi
+uvicorn
+sqlalchemy
+psycopg2-binary
+pydantic
+streamlit
+langchain
+openai
+chromadb
+huggingface-hub
+transformers
+python-dotenv
+email-validator

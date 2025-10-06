@@ -5,9 +5,13 @@ psycopg2-binary
 pydantic
 streamlit
 langchain
+langchain_community
 openai
 chromadb
 huggingface-hub
 transformers
 python-dotenv
 email-validator
+langchain-huggingface
+langchain-chroma
+sentence-transformers

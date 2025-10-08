@@ -19,8 +19,8 @@ PERSIST_DIR = os.path.abspath(PERSIST_DIR)
 #print(PERSIST_DIR)
 
 EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
-PRODUCT_COLLECTION = "products"
-REVIEW_COLLECTION = "reviews"
+PRODUCT_COLLECTION = "products_with_sentiment"
+REVIEW_COLLECTION = "reviews_with_sentiment"
 
 # -------------------------------
 # INITIALIZE
@@ -96,6 +96,20 @@ def _get_review_store() -> Chroma:
         _review_store = Chroma(collection_name=REVIEW_COLLECTION, embedding_function=emb, persist_directory=PERSIST_DIR)
     return _review_store
 
+def format_sentiment_summary(md: dict) -> str:
+    """
+    Returns a human-readable sentiment summary from metadata.
+    Example: "75% positive, 20% neutral, 5% negative reviews. Avg score: 0.42"
+    """
+    pos_pct = md.get("positive_pct", 0.0) or 0.0
+    neu_pct = md.get("neutral_pct", 0.0) or 0.0
+    neg_pct = md.get("negative_pct", 0.0) or 0.0
+    avg_score = md.get("avg_sentiment_score", None)
+
+    summary = f"{round(pos_pct, 1)}% positive, {round(neu_pct, 1)}% neutral, {round(neg_pct, 1)}% negative"
+    if avg_score is not None:
+        summary += f". Avg sentiment score: {round(avg_score, 2)}"
+    return summary
 
 def get_top_products(query: str, k: int = 3) -> List[Dict[str, Any]]:
     """
@@ -117,6 +131,7 @@ def get_top_products(query: str, k: int = 3) -> List[Dict[str, Any]]:
         md = getattr(d, "metadata", {}) or {}
         # Chroma doc content is in page_content
         snippet = d.page_content if hasattr(d, "page_content") else str(d)
+        sentiment_summary = format_sentiment_summary(md)
         # Some vectorstores include a 'score' in doc; Chroma via LangChain doc doesn't expose score directly.
         # If you need scores, use chromadb client directly. For now, we return None for score.
         results.append({
@@ -124,10 +139,20 @@ def get_top_products(query: str, k: int = 3) -> List[Dict[str, Any]]:
             "product_name": md.get("product_name"),
             "snippet": snippet,
             "metadata": md,
-            "score": None
+            "score": None,
+            "sentiment_summary": sentiment_summary, 
+             # product-level sentiment
+            "positive_count": md.get("positive_count"),
+            "neutral_count": md.get("neutral_count"),
+            "negative_count": md.get("negative_count"),
+            "positive_pct": md.get("positive_pct"),
+            "neutral_pct": md.get("neutral_pct"),
+            "negative_pct": md.get("negative_pct"),
+            "avg_sentiment_score": md.get("avg_sentiment_score"),
+            "num_reviews_used": md.get("num_reviews_used")
         })
         
-    print(results)
+    #print(results)
     df = pd.DataFrame(results)
 
         # Drop duplicate product_ids, keeping the best (lowest) score
@@ -168,6 +193,12 @@ def get_reviews_for_product(product_id: Optional[str] = None, product_name: Opti
         filtered = []
         for d in docs:
             md = getattr(d, "metadata", {}) or {}
+            review_sent_summary = ""
+            label = md.get("review_sentiment_label")
+            score = md.get("review_sentiment_score")
+            if label or score is not None:
+                review_sent_summary = f"Label: {label}, Score: {score}" if label else f"Score: {score}"
+
             # print(md.get("product_id"))
             if product_id and md.get("product_id") == product_id:
                 filtered.append(d)
@@ -201,7 +232,20 @@ def get_reviews_for_product(product_id: Optional[str] = None, product_name: Opti
                 "review_text": d.page_content,
                 "rating": md.get("rating"),
                 "metadata": md,
-                "score": None
+                "score": None,
+                "review_sentiment_summary": review_sent_summary,
+                # per-review sentiment
+                "review_sentiment_label": md.get("review_sentiment_label"),
+                "review_sentiment_score": md.get("review_sentiment_score"),
+                # product-level sentiment (if you want)
+                "positive_count": md.get("positive_count"),
+                "neutral_count": md.get("neutral_count"), 
+                "negative_count": md.get("negative_count"),
+                "positive_pct": md.get("positive_pct"),
+                "neutral_pct": md.get("neutral_pct"),
+                "negative_pct": md.get("negative_pct"),
+                "avg_sentiment_score": md.get("avg_sentiment_score"),
+                "num_reviews_used": md.get("num_reviews_used")
             })
         return results
 
@@ -236,6 +280,7 @@ if __name__ == "__main__":
     for i, p in enumerate(tops, 1):
         print(f"\n[{i}] {p['product_name']} (id={p['product_id']})")
         print("Snippet:", p["snippet"][:400].replace("\n", " "))
+        print("review:", p['sentiment_summary'])
     
     # If user wants reviews for the first product:
     if tops:

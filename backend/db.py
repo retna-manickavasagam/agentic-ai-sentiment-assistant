@@ -4,7 +4,7 @@ try:
     conn = psycopg2.connect(
         dbname="AI",
         user="postgres",
-        password="moudbpass212",
+        password="password",
         host="localhost",
         port="5432"
     )

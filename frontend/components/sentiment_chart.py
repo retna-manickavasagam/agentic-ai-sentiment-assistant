@@ -31,5 +31,3 @@ def sentiment_view():
     filtered_df = df if sentiment_filter == "All" else df[df['sentiment'] == sentiment_filter]
     st.dataframe(filtered_df[['timestamp', 'message', 'sentiment']])
 
-if __name__ == "__main__":
-    main()

@@ -1,63 +1,13 @@
 import streamlit as st
 # Set page configuration
 
-st.set_page_config(page_title="Chatbot Dashboard", layout="wide")
-
-# Initialize session state for chat history and user management
-if 'chat_history' not in st.session_state:
-    st.session_state.chat_history = []
-if 'users' not in st.session_state:
-    st.session_state.users = {'admin': 'password123'}
-if 'logged_in' not in st.session_state:
-    st.session_state.logged_in = False
-
-# Simulated sentiment analysis function
-def analyze_sentiment(message):
-    # Placeholder for sentiment analysis logic
-    words = message.lower().split()
-    positive_words = ['good', 'great', 'awesome', 'happy']
-    negative_words = ['bad', 'poor', 'terrible', 'sad']
-    
-    pos_count = sum(1 for word in words if word in positive_words)
-    neg_count = sum(1 for word in words if word in negative_words)
-    
-    if pos_count > neg_count:
-        return 'Positive'
-    elif neg_count > pos_count:
-        return 'Negative'
-    return 'Neutral'
-
-# Chatbot response simulation
-def get_bot_response(user_input):
-    return f"Bot: Echoing your message - {user_input}"
-
-# Main app
-def main():
-    # Sidebar for navigation
-    st.sidebar.title("Navigation")
-    page = st.sidebar.radio("Go to", ["Chatbot", "Admin Dashboard", "Sentiment View"])
-
-    if page == "Chatbot":
-        chatbot_ui()
-    elif page == "Admin Dashboard":
-        admin_dashboard()
-    elif page == "Sentiment View":
-        sentiment_view()
-
 def chatbot_ui():
     st.title("Chatbot Interface")
-    
+
+
     # Chat container
     chat_container = st.container()
-    
-    # Display chat history
-    with chat_container:
-        for chat in st.session_state.chat_history:
-            st.markdown(f"**User**: {chat['message']}")
-            st.markdown(f"**Bot**: {chat['response']}")
-            st.markdown(f"**Sentiment**: {chat['sentiment']}")
-            st.markdown("---")
-    
+        
     # Input form
     with st.form(key='chat_form', clear_on_submit=True):
         user_input = st.text_input("Type your message:", key="user_input")
@@ -72,3 +22,41 @@ def chatbot_ui():
                 'sentiment': sentiment,
                 'timestamp': datetime.now()
             })
+
+    
+  
+    # Chat input
+    if prompt := st.chat_input("Ask me anything! 🤖"):
+        st.session_state.messages.append({"content": prompt, "is_user": True})
+        message(prompt, is_user=True)
+        
+        # Generate bot response
+        with st.chat_message("assistant"):
+            with st.spinner("🤖 Thinking..."):
+                try:
+                    response = openai.ChatCompletion.create(
+                        model="gpt-3.5-turbo",
+                        messages=[
+                            {"role": "system", "content": KNOWLEDGE_BASE},
+                            *[{"role": "user" if m["is_user"] else "assistant", "content": m["content"]} for m in st.session_state.messages]
+                        ]
+                    )
+                    bot_reply = response.choices[0].message.content
+                    st.session_state.messages.append({"content": bot_reply, "is_user": False})
+                    message(bot_reply, is_user=False)
+                    
+                    # Store for analysis
+                    st.session_state.chat_history.append({
+                        "timestamp": datetime.now(),
+                        "user": prompt,
+                        "bot": bot_reply
+                    })
+                except Exception as e:
+                    st.error(f"🤖 Oops! Error: {e}")
+    
+    # Clear chat button
+    if st.button("🗑️ Clear Chat", key="clear_chat"):
+        st.session_state.messages = []
+        st.experimental_rerun()
+    
+    st.markdown('</div>', unsafe_allow_html=True)

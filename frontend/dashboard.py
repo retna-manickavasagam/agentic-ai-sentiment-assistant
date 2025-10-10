@@ -1,37 +1,25 @@
-def admin_dashboard():
-    st.title("Admin Dashboard")
-    
-    # Login check
-    if not st.session_state.logged_in:
-        with st.form(key='login_form'):
-            username = st.text_input("Username")
-            password = st.text_input("Password", type="password")
-            login_button = st.form_submit_button("Login")
-            
-            if login_button:
-                if username in st.session_state.users and st.session_state.users[username] == password:
-                    st.session_state.logged_in = True
-                    st.success("Logged in successfully!")
-                else:
-                    st.error("Invalid credentials")
-        return
+# Page: Sentiment View
+if __name__ == "__main__":
+    elif selected == "Sentiment View 📈":
+    st.markdown('<div class="title">📈 Sentiment Analysis</div>', unsafe_allow_html=True)
+    st.markdown('<div class="subtitle">Visualize user sentiment over time 😊😐😞</div>', unsafe_allow_html=True)
 
-    # Admin features
-    st.header("User Management")
-    with st.form(key='user_management'):
-        new_user = st.text_input("New Username")
-        new_password = st.text_input("New Password", type="password")
-        add_user = st.form_submit_button("Add User")
+    if st.session_state.sentiment_data:
+        sentiment_df = pd.DataFrame(st.session_state.sentiment_data)
         
-        if add_user and new_user and new_password:
-            st.session_state.users[new_user] = new_password
-            st.success(f"User {new_user} added successfully!")
-         
-    st.header("Chat History")
-    if st.session_state.chat_history:
-        df = pd.DataFrame(st.session_state.chat_history)
-        st.dataframe(df[['timestamp', 'message', 'response', 'sentiment']])
-        
-        if st.button("Clear Chat History"):
-            st.session_state.chat_history = []
-            st.success("Chat history cleared!")
+        # Sentiment Distribution Pie Chart
+        st.markdown("### Sentiment Distribution")
+        sentiment_counts = sentiment_df['sentiment'].value_counts().reset_index()
+        sentiment_counts.columns = ['Sentiment', 'Count']
+        fig_pie = px.pie(sentiment_counts, names='Sentiment', values='Count', color='Sentiment',
+                         color_discrete_map={'Positive 😊': '#27ae60', 'Neutral 😐': '#f1c40f', 'Negative 😞': '#e74c3c'})
+        st.plotly_chart(fig_pie, use_container_width=True)
+
+        # Sentiment Score Over Time
+        st.markdown("### Sentiment Trend")
+        fig_line = px.line(sentiment_df, x='timestamp', y='score', title="Sentiment Score Over Time",
+                           labels={'score': 'Sentiment Score', 'timestamp': 'Time'},
+                           color_discrete_sequence=['#ff6f61'])
+        st.plotly_chart(fig_line, use_container_width=True)
+    else:
+        st.info("No sentiment data available yet. Start chatting to see insights! 📊")

@@ -2,9 +2,12 @@
 
 import streamlit as st
 from components.chat_ui import chatbot_ui
+import openai
+import plotly.express as px
 import pandas as pd
 from datetime import datetime
 from streamlit_option_menu import option_menu
+from textblob import TextBlo
 
 # Set page config for wide layout and robot favicon
 st.set_page_config(
@@ -70,6 +73,15 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
+try:
+    openai.api_key = st.secrets["openai"]    
+except:
+    st.error("🚨 OpenAI API key not found in secrets.toml. Add it as per instructions!")
+    st.stop()
+
+# Knowledge base (customize as needed)
+KNOWLEDGE_BASE = "You are a friendly assistant for a tech company building AI tools like Grok. Provide clear, concise answers with a touch of humor"
+
 # Sidebar navigation with robot emojis
 with st.sidebar:
     st.markdown("### 🤖 Chatbot App")
@@ -95,7 +107,7 @@ if "chat_history" not in st.session_state:
 
 # Page: Chatbot
 if selected == "💬 Chat":
-    st.markdown('<h1 class="main-header">🤖 Sent AI Interface</h1>', unsafe_allow_html=True)
+    st.markdown('<h1 class="main-header">🤖 Sent AI Shopping Assistant</h1>', unsafe_allow_html=True)
     st.markdown('<div class="chat-container">', unsafe_allow_html=True)
     
     # Display chat history

@@ -22,3 +22,6 @@ torch
 tqdm
 python-dotenv
 pydantic
+requests
+plotly
+numpy

@@ -194,6 +194,61 @@ def get_sentiment(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
 
+
+@app.get("/get_product_ids")
+def get_product_ids(
+    limit: int = Query(50, description="Number of product IDs to return"),
+    db: Session = Depends(get_db)
+):
+    """Get a list of product IDs for the frontend"""
+    try:
+        result = db.execute(text("""
+            SELECT DISTINCT product_id 
+            FROM ai_schema.sentiment_results 
+            WHERE product_id IS NOT NULL 
+            AND product_id != ''
+            ORDER BY product_id
+            LIMIT :limit
+        """), {"limit": limit})
+        
+        product_ids = [row[0] for row in result.fetchall()]
+        
+        return {
+            "product_ids": product_ids,
+            "count": len(product_ids)
+        }
+        
+    except Exception as e:
+        return {"status": "error", "detail": str(e)}
+
+@app.get("/available-sentiment-labels")
+def get_available_sentiment_labels(db: Session = Depends(get_db)):
+    """Get all distinct sentiment labels available in the database"""
+    try:
+        result = db.execute(text("""
+            SELECT DISTINCT sentiment_label, COUNT(*) as count
+            FROM ai_schema.sentiment_results 
+            WHERE sentiment_label IS NOT NULL
+            AND sentiment_label != ''
+            GROUP BY sentiment_label
+            ORDER BY count DESC
+        """))
+        
+        labels = []
+        for row in result:
+            labels.append({
+                "label": row[0],
+                "count": row[1]
+            })
+        
+        return {
+            "available_labels": labels,
+            "total_unique_labels": len(labels)
+        }
+        
+    except Exception as e:
+        return {"status": "error", "detail": str(e)}
+
 # Health check for database
 @app.get("/health", response_model=schemas.HealthCheck)
 def health_check(db: Session = Depends(get_db)):

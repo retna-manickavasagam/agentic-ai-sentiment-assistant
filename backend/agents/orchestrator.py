@@ -60,8 +60,17 @@ def handle_user_message(user_message, agent):
     if "order" in lower:
         print('inside order')
         if product_id:
-            order = order_product(product_id)
-            return f"Product {product_name} ordered successfully!" if order.get("success") else "Order failed."
+            data = {
+                'product_id': product_id,
+                'name' : product_name
+            }
+            json_string = json.dumps(data, indent=4) # indent for pretty-printing
+            print(json_string)
+            order = order_product(json_string)
+            print("order response: ")
+            print(order)
+            print(order.get("success"))
+            return f"Product {product_name} ordered successfully! Your order number {order["order_id"]}" if order["order_id"] else "Order failed."
         else:
             return "Cannot order: No product ID found."
     

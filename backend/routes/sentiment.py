@@ -1,6 +1,5 @@
  # FastAPI backend API
-from fastapi import FastAPI, HTTPException, Depends, Query
-from fastapi import APIRouter, HTTPException
+from fastapi import FastAPI, HTTPException, Depends, Query, APIRouter
 from sqlalchemy.orm import Session
 from backend.db import SessionLocal, get_db, engine
 from backend.models_reflected import SentimentResults

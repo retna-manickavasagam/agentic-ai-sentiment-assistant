@@ -61,11 +61,13 @@ def retrieve_review_by_name(product_name: str):
 
 
 @tool("OrderProduct")
-def order_product(product_id: str):
+def order_product(order: str):
     """
     Place an order for a product using its product_id.
     """
-    payload = {"product_id": product_id}
+    orderObj = json.loads(order)
+    print(orderObj)
+    payload = {"product_id": orderObj["product_id"], "name": orderObj["name"]}
     res = requests.post(API_URL + ORDER_URL, json=payload)
     return res.json()
 

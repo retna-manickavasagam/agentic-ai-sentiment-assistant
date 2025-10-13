@@ -5,7 +5,7 @@ from db import save_csv_to_postgres  # adjust import
 # Get the base path (project/backend)
 base_dir = Path(__file__).resolve().parent
 
-csv_file_name = "sentiment_data.csv" # replace with the filename whatever table you want to create
+csv_file_name = "sentiment_data.csv"
 
 # Build path to CSV
 csv_path = base_dir.parent / "data" / "processed" / csv_file_name
@@ -17,7 +17,7 @@ db_config = {
         "port": 5432,
         "dbname": "AI",
         "user": "postgres",
-        "password": "password"
+        "password": "moudbpass212"
 }
 
 # Example call

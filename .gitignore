@@ -122,3 +122,6 @@ dmypy.json
 
 #chroma
 chroma_db/
+
+frontend/.streamlit/secrets.toml
+.env

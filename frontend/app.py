@@ -7,7 +7,7 @@ import plotly.express as px
 import pandas as pd
 from datetime import datetime
 from streamlit_option_menu import option_menu
-from textblob import TextBlo
+from textblob import TextBlob
 
 # Set page config for wide layout and robot favicon
 st.set_page_config(

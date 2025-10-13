@@ -1,7 +1,39 @@
 import psycopg2
 import pandas as pd
 import re
+from sqlalchemy import create_engine
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
+import os
+from dotenv import load_dotenv
 
+# Load environment variables
+load_dotenv()
+# Database configuration
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+# Validate that DATABASE_URL exists
+if not DATABASE_URL:
+    raise ValueError("DATABASE_URL not found in environment variables. Check your .env file")
+
+print(f"Database URL: {DATABASE_URL}")  # Optional: for debugging
+
+# Create engine
+engine = create_engine(DATABASE_URL)
+
+# Create SessionLocal class
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+# Create Base class
+Base = declarative_base()
+
+# Dependency to get database session
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 try:
 
@@ -29,7 +61,13 @@ try:
 
         # Create table dynamically (simple example)
         columns = ', '.join([f"{col} TEXT" for col in df.columns])
-        cursor.execute(f"CREATE TABLE IF NOT EXISTS {schema_name}.{table_name} ({columns});")
+        create_table_sql = f"""
+        CREATE TABLE IF NOT EXISTS {schema_name}."{table_name}" (
+            id SERIAL PRIMARY KEY,
+            {columns}
+        );
+    """
+        cursor.execute(create_table_sql)
         conn.commit()
         print(f"🧱 Table '{schema_name}.{table_name}' created or already exists.")
 

@@ -17,7 +17,7 @@ db_config = {
         "port": 5432,
         "dbname": "AI",
         "user": "postgres",
-        "password": "moudbpass212"
+        "password": "password"
 }
 
 # Example call

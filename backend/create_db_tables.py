@@ -17,7 +17,7 @@ db_config = {
         "port": 5432,
         "dbname": "AI",
         "user": "postgres",
-        "password": "password"
+        "password": "data2025"
 }
 
 # Example call

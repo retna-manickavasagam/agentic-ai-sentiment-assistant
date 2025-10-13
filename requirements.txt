@@ -25,3 +25,7 @@ pydantic
 requests
 plotly
 numpy
+langchain_openai
+streamlit_option_menu
+textblob
+streamlit-chat

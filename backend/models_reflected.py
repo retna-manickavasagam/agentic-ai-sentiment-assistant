@@ -1,6 +1,6 @@
 # backend/models_reflected.py
 from sqlalchemy import Table, MetaData
-from db import engine
+from backend.db import engine
 
 metadata = MetaData()
 

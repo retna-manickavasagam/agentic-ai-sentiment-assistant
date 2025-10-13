@@ -18,7 +18,7 @@ class ReviewRequest(BaseModel):
     product_id: Optional[str] = Field(None, description="Optional product id (use this to filter)")
     product_name: Optional[str] = Field(None, description="Fallback product name for similarity search")
     k: int = Field(3, ge=1, le=100, description="Number of reviews to return")
-    include_sources: bool = Field(False, description="Include original review text and metadata in results")
+    include_sources: bool = Field(True, description="Include original review text and metadata in results")
 
 
 class Hit(BaseModel):
@@ -28,7 +28,10 @@ class Hit(BaseModel):
     text: Optional[str]
     metadata: Optional[Dict[str, Any]]
 
-
+class AddReviewRequest(BaseModel):
+    product_id: str
+    review_text: str
+    rating: int  # or float, if you allow e.g. 4.5
 # ---------- Routes ----------
 
 @router.post("/retrieve", response_model=Dict[str, Any])
@@ -38,6 +41,7 @@ async def reviews(req: ReviewRequest):
     Otherwise product_name (approximate / semantic match) will be used.
     """
     # validation: need at least one identifier
+    print('inside reviews.py')
     if not req.product_id and not req.product_name:
         raise HTTPException(status_code=400, detail="Provide product_id or product_name")
 
@@ -64,10 +68,22 @@ async def reviews(req: ReviewRequest):
             item["text"] = d.get("review_text")
             item["metadata"] = d.get("metadata", {})
         out_results.append(item)
-    #print(out_results)
+    print(out_results)
     return {
         "product_id": req.product_id,
         "product_name": req.product_name,
         "count": len(out_results),
         "results": out_results
+    }
+
+
+@router.post("/add", response_model=Dict[str, Any])
+async def add_review(req: AddReviewRequest):
+    # TODO: Add your DB/store logic here
+    # For now, just echo back
+    return {
+        "success": True,
+        "product_id": req.product_id,
+        "review_text": req.review_text,
+        "rating": req.rating
     }

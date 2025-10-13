@@ -11,7 +11,7 @@ from textblob import TextBlob
 import requests
 import plotly.graph_objects as go
 import numpy as np
-
+from streamlit_chat import message
 
 # Set page config for wide layout and robot favicon
 st.set_page_config(
@@ -21,7 +21,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 # FastAPI backend URL
-API_BASE_URL = "http://localhost:8000"
+API_BASE_URL = "http://localhost:8000/api"
 
 # Custom CSS for colorful UI with hover effects
 st.markdown("""
@@ -80,11 +80,11 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-try:
-    openai.api_key = st.secrets["openai"]    
-except:
-    st.error("🚨 OpenAI API key not found in secrets.toml. Add it as per instructions!")
-    st.stop()
+# try:
+#     openai.api_key = st.secrets["openai"]    
+# except:
+#     st.error("🚨 OpenAI API key not found in secrets.toml. Add it as per instructions!")
+#     st.stop()
 
 # Knowledge base (customize as needed)
 KNOWLEDGE_BASE = "You are a friendly assistant for a tech company building AI tools like Grok. Provide clear, concise answers with a touch of humor"
@@ -130,14 +130,19 @@ if selected == "💬 Chat":
         with st.chat_message("assistant"):
             with st.spinner("🤖 Thinking..."):
                 try:
-                    response = openai.ChatCompletion.create(
-                        model="gpt-3.5-turbo",
-                        messages=[
-                            {"role": "system", "content": KNOWLEDGE_BASE},
-                            *[{"role": "user" if m["is_user"] else "assistant", "content": m["content"]} for m in st.session_state.messages]
-                        ]
-                    )
-                    bot_reply = response.choices[0].message.content
+                    url = "http://localhost:8001/api/chat"    # <-- Update port if needed
+                    print(prompt)
+                    payload = {"message": prompt}
+                    # response = openai.ChatCompletion.create(
+                    #     model="gpt-3.5-turbo",
+                    #     messages=[
+                    #         {"role": "system", "content": KNOWLEDGE_BASE},
+                    #         *[{"role": "user" if m["is_user"] else "assistant", "content": m["content"]} for m in st.session_state.messages]
+                    #     ]
+                    # )
+                    res = requests.post(url, json=payload, timeout=10)
+                    bot_reply = res.json().get("reply", "No response.")
+                    #bot_reply = response.choices[0].message.content
                     st.session_state.messages.append({"content": bot_reply, "is_user": False})
                     message(bot_reply, is_user=False)
                     

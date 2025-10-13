@@ -116,7 +116,7 @@ def get_top_products(query: str, k: int = 3) -> List[Dict[str, Any]]:
     Return top-k matching products for a user query using product_docs collection.
 
     Returns a list of dicts:
-      { "product_id": str, "product_name": str, "score": float, "snippet": str, "metadata": {...} }
+      { "product_id": str, "product_name": str, "snippet": str, "metadata": {...} }
     """
     if not query or not query.strip():
         return []

@@ -35,6 +35,7 @@ async def products(req: ProductRequest):
     """
     Return top-k matching products for a user query by calling rag_engine.get_top_products.
     """
+    print("inside products.py")
     try:
         results = rag_engine.get_top_products(req.query, k=req.k)
     except Exception as e:

@@ -1,5 +1,5 @@
 from .memory import ConversationMemory
-from .api_tools import retrieve_product, retrieve_review_by_id,retrieve_review_by_name, order_product, add_review_tool
+from .api_tools import retrieve_product, retrieve_review_by_id,retrieve_review_by_name, order_product, add_review_tool, send_email
 from textblob import TextBlob
 import json
 
@@ -27,6 +27,8 @@ def handle_user_message(user_message, agent):
     lower = user_message.lower()
     product_id = memory.get("product_id")
     product_name = memory.get("product_name")
+    user_email = memory.get("user_email")
+    last_order = memory.get("last_order")
     print(f"orchestor: {product_id} {product_name}")
     # Recommend or search
     if "recommend" in lower or "suggest" in lower or "find" in lower or "search" in lower:
@@ -67,6 +69,7 @@ def handle_user_message(user_message, agent):
             json_string = json.dumps(data, indent=4) # indent for pretty-printing
             print(json_string)
             order = order_product(json_string)
+            memory.set("last_order", order)
             print("order response: ")
             print(order)
             print(order.get("success"))
@@ -97,6 +100,42 @@ def handle_user_message(user_message, agent):
             )
             print(context_message)
             return agent.run(context_message)
+        
+    if ("send email" in lower or "email me" in lower):
+        if not user_email:
+            memory.set("awaiting_email", True)
+            return "Please provide your email address so I can send your order details."
+        elif not last_order:
+            return "I don't have a recent order to email."
+        else:
+            subject = "Your Agentic AI Order"
+            body = (
+                f"Order ID: {last_order.get('order_id')}\n"
+                "Thank you for your order!"
+            )
+            #body="Test Email"
+            email_resp = send_email({"to_email": user_email, "subject": subject, "body": body})
+            return email_resp
+        
+         # Prompt for email entry
+    if memory.get("awaiting_email", False):
+        if "@" in user_message and "." in user_message:
+            memory.set("user_email", user_message.strip())
+            memory.set("awaiting_email", False)
+            #if last_order:
+            if 1==1:
+                subject = "Your Agentic AI Order"
+                body = (
+                f"Order ID: {last_order.get('order_id')}\n"
+                "Thank you for your order!"
+            )
+                #body="Test Email"
+                email_resp = send_email({"params": {"to_email": memory.get("user_email"),"subject": subject,"body": body}})
+                return email_resp
+            #else:
+             #   return "No recent order to email."
+        else:
+            return "That doesn't look like a valid email address. Please try again."
 
     # Generic fallback
     return agent.run(user_message)

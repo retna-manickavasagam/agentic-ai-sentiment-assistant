@@ -9,7 +9,7 @@ from langchain_openai import ChatOpenAI
 from langchain.agents import initialize_agent, AgentType
 
 # Import custom tools from agents/api_tools.py
-from .api_tools import retrieve_product, retrieve_review_by_id, retrieve_review_by_name, order_product, add_review_tool
+from .api_tools import retrieve_product, retrieve_review_by_id, retrieve_review_by_name, order_product, add_review_tool, send_email
 
 # Initialize the LLM with API Key
 llm = ChatOpenAI(
@@ -19,7 +19,7 @@ llm = ChatOpenAI(
 )
 
 # Register your tools as a list
-tools = [retrieve_product, retrieve_review_by_id, retrieve_review_by_name, order_product, add_review_tool]
+tools = [retrieve_product, retrieve_review_by_id, retrieve_review_by_name, order_product, add_review_tool, send_email]
 
 # Initialize the LangChain agent
 def get_agent():

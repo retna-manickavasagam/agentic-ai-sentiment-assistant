@@ -31,7 +31,7 @@ async def products(order: OrderRequest, db: Session = Depends(get_db)):
         print(f"Order attributes: {order_id}")
         
         stmt = text("""
-            INSERT INTO ai_schema.orders (product_id, name, _date, order_id)
+            INSERT INTO ai_schema.orders (product_id, name, date, order_id)
             VALUES (:product_id, :name, :date, :order_id)
             RETURNING order_id;
         """)
@@ -56,4 +56,10 @@ async def products(order: OrderRequest, db: Session = Depends(get_db)):
     except Exception as e:
         db.rollback()  # Rollback on error
         print(f"Error details: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+        #raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+        return {
+            "message": "✅ New order inserted failed",
+            "order_id": "",
+            "product_id": "",
+            "date": ""
+        }

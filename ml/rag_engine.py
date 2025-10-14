@@ -123,7 +123,8 @@ def get_top_products(query: str, k: int = 3) -> List[Dict[str, Any]]:
 
     store = _get_product_store()
   
-    retriever = store.as_retriever(search_kwargs={"k": 20})
+    retriever = store.as_retriever(search_type="similarity_score_threshold", 
+                            search_kwargs={"score_threshold": 0.3, "k": 20})
     docs = retriever.get_relevant_documents(query)
 
     results = []
@@ -156,7 +157,7 @@ def get_top_products(query: str, k: int = 3) -> List[Dict[str, Any]]:
     df = pd.DataFrame(results)
 
         # Drop duplicate product_ids, keeping the best (lowest) score
-    df = df.sort_values("score", ascending=True).drop_duplicates(subset=["product_id"], keep="first")
+    df = df.drop_duplicates(subset=["product_id"], keep="first")
 
         # Return top unique 3 products
     top_results = df.head(k).to_dict(orient="records")

@@ -7,6 +7,7 @@ PRODUCT_URL = "api/products/retrieve"
 REVIEW_URL = "api/reviews/retrieve"
 ORDER_URL="api/order/insert"
 REVIEW_ADD_URL = "api/reviews/add"
+EMAIL_URL = "api/email/send"
 
 class AddReviewInput(BaseModel):
         review_json: str
@@ -90,3 +91,23 @@ def add_review_tool(review_json: str):
         return f"Your review for product {payload['product_id']} was {'added successfully' if data.get('success') else 'not added'}."
     except Exception as e:
         return f"Failed to add review: {e}"
+    
+    
+@tool("SendEmail")
+def send_email(params: dict):
+    """
+    Wrapper for group email sending using a single dictionary parameter.
+    Expects params: {"to_email": ..., "subject": ..., "body": ...}
+    """
+    to_email = params.get("to_email")
+    subject = params.get("subject")
+    body = params.get("body")
+    payload = {"to_email": to_email, "subject": subject, "body": body}
+    url = API_URL + EMAIL_URL
+    try:
+        res = requests.post(url, json=payload, timeout=10)
+        res.raise_for_status()
+        data = res.json()
+        return f"Email is sent successfully."
+    except Exception as e:
+        return f"Failed to send email: {e}"

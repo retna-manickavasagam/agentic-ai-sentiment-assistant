@@ -91,15 +91,9 @@ def handle_user_message(user_message, agent):
             str_payload = json.dumps(payload)
             print(str_payload)
             backend_resp = add_review_tool({"review_json": json.dumps(payload)})
-        
+
             print(backend_resp)
-            context_message = (
-                f'The user just left a review for "{product_id}" (rating {rating}): "{user_message}". '
-                "Review was saved to the database. Please respond empathetically. "
-                "If the rating is low, offer an alternative."
-            )
-            print(context_message)
-            return agent.run(context_message)
+            return f"Product {product_name} review added successfully!"
         
     if ("send email" in lower or "email me" in lower):
         if not user_email:

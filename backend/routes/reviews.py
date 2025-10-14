@@ -3,7 +3,7 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 from typing import Optional, List, Any, Dict
-from ml import rag_engine  
+from ml import rag_engine, sentiment_model
 
 router = APIRouter(prefix="/api/reviews", tags=["rag"])
 
@@ -79,6 +79,9 @@ async def reviews(req: ReviewRequest):
 
 @router.post("/add", response_model=Dict[str, Any])
 async def add_review(req: AddReviewRequest):
+    print('inside add review')
+    #result = sentiment_model.analyze_texts(req.review_text)
+    #print(result)
     # TODO: Add your DB/store logic here
     # For now, just echo back
     return {

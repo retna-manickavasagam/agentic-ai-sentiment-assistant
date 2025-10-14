@@ -20,6 +20,7 @@ async def chat_endpoint(chat_request: ChatRequest, request: Request):
     user_message = chat_request.message
     # Optionally, expose per-user memory by using request.session, user_id, etc.
     response = handle_user_message(user_message, agent)
+    print(f"static response - {response}")
     empathetic_reply = to_empathetic_reply(response, user_message)
     return {"reply": empathetic_reply}
 

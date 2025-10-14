@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Request
 from pydantic import BaseModel
-from backend.agents.agent_bot import get_agent
+from backend.agents.agent_bot import get_agent, to_empathetic_reply
 from backend.agents.orchestrator import handle_user_message
+
 
 # Define FastAPI router
 router = APIRouter(prefix="/api", tags=["agent"])
@@ -19,4 +20,7 @@ async def chat_endpoint(chat_request: ChatRequest, request: Request):
     user_message = chat_request.message
     # Optionally, expose per-user memory by using request.session, user_id, etc.
     response = handle_user_message(user_message, agent)
-    return {"reply": response}
+    empathetic_reply = to_empathetic_reply(response, user_message)
+    return {"reply": empathetic_reply}
+
+

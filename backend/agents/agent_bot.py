@@ -1,5 +1,6 @@
 import os
 from dotenv import load_dotenv
+from langchain.schema import SystemMessage, HumanMessage
 
 # Load environment variables from .env
 load_dotenv()
@@ -30,3 +31,18 @@ def get_agent():
         verbose=True
     )
     return agent
+
+
+def to_empathetic_reply(agent_result, user_query):
+    print('inside empathetic')
+    system_prompt = (
+        "You are a friendly, empathetic AI assistant. "
+        "Using the structured info below, reply to the user in a warm, supportive, and conversational way. "
+        "Do NOT just repeat the facts; make the user feel understood and help them make a better decision."
+    )
+    messages = [
+        SystemMessage(content=system_prompt),
+        HumanMessage(content=f"Structured details: {agent_result}\n\nUser query: {user_query}\n\nReply empathetically and helpfully.")
+    ]
+    reply = llm(messages)
+    return reply.content

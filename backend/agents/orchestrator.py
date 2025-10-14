@@ -1,6 +1,7 @@
 from .memory import ConversationMemory
 from .api_tools import retrieve_product, retrieve_review_by_id,retrieve_review_by_name, order_product, add_review_tool, send_email
 from textblob import TextBlob
+from rapidfuzz import fuzz
 import json
 
 memory = ConversationMemory()
@@ -31,13 +32,14 @@ def handle_user_message(user_message, agent):
     last_order = memory.get("last_order")
     print(f"orchestor: {product_id} {product_name}")
     # Recommend or search
-    if "recommend" in lower or "suggest" in lower or "find" in lower or "search" in lower:
+    if "recommend" in lower or "suggest" in lower or "find" in lower or "search" in lower or "have" in lower:
         print('inside recommend')
         result = retrieve_product(user_message)
         # result is a dict response shown above
         if "results" in result and len(result["results"]) > 0:
             # Pick the top product (you can add user selection later!)
             top_product = result["results"][0]
+            
             pid = top_product.get("product_id")
             pname = top_product.get("product_name")
             memory.set("product_id", pid)

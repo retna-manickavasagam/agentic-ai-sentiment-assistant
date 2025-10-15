@@ -210,7 +210,7 @@ elif selected == "🔧 Admin":
         #     st.dataframe(filtered_df[["timestamp", "user", "bot"]], use_container_width=True)
         # else:
         #     st.info("No conversations found in the selected date range.")
-        st.write("Full dataset:")
+        # st.write("Full dataset:")
         st.dataframe(df[["timestamp", "user", "bot"]], use_container_width=True)
         
         # Download button

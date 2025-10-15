@@ -31,7 +31,7 @@ async def products(order: OrderRequest, db: Session = Depends(get_db)):
         print(f"Order attributes: {order_id}")
         
         stmt = text("""
-            INSERT INTO ai_schema.orders (product_id, name, date, order_id)
+            INSERT INTO ai_schema.orders (product_id, name, _date, order_id)
             VALUES (:product_id, :name, :date, :order_id)
             RETURNING order_id;
         """)

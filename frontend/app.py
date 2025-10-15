@@ -5,7 +5,7 @@ from components.chat_ui import chatbot_ui
 import openai
 import plotly.express as px
 import pandas as pd
-from datetime import datetime
+from datetime import datetime, timedelta
 from streamlit_option_menu import option_menu
 from textblob import TextBlob
 import requests
@@ -140,7 +140,7 @@ if selected == "💬 Chat":
                     #         *[{"role": "user" if m["is_user"] else "assistant", "content": m["content"]} for m in st.session_state.messages]
                     #     ]
                     # )
-                    res = requests.post(url, json=payload, timeout=10)
+                    res = requests.post(url, json=payload, timeout=60)
                     bot_reply = res.json().get("reply", "No response.")
                     #bot_reply = response.choices[0].message.content
                     st.session_state.messages.append({"content": bot_reply, "is_user": False})
@@ -186,17 +186,27 @@ elif selected == "🔧 Admin":
             st.markdown('</div>', unsafe_allow_html=True)
         
         # Filter by date
+        # Convert timestamp to datetime if it's not already
+        if not pd.api.types.is_datetime64_any_dtype(df['timestamp']):
+            df['timestamp'] = pd.to_datetime(df['timestamp'])
         st.subheader("📅 Filter Conversations")
+        today = datetime.today()
+        future_date = today + timedelta(days=30)
         date_range = st.slider("Select Date Range", 
-                              min_value=df["timestamp"].min().date(), 
-                              max_value=df["timestamp"].max().date(), 
-                              value=(df["timestamp"].min().date(), df["timestamp"].max().date()),
+                              min_value=today,
+                              max_value=future_date,
+                              value=(today, today + timedelta(days=7)),
                               format="YYYY-MM-DD")
-        filtered_df = df[df["timestamp"].dt.date.between(date_range[0], date_range[1])]
+        filtered_df = df[df["timestamp"].between(date_range[0], date_range[1])]
         
         # Conversation table
         st.subheader("📋 Recent Conversations")
-        st.dataframe(filtered_df[["timestamp", "user", "bot"]], use_container_width=True)
+        # if len(filtered_df) > 0:
+        #     st.dataframe(filtered_df[["timestamp", "user", "bot"]], use_container_width=True)
+        # else:
+        #     st.info("No conversations found in the selected date range.")
+        st.write("Full dataset:")
+        st.dataframe(df[["timestamp", "user", "bot"]], use_container_width=True)
         
         # Download button
         csv = filtered_df.to_csv(index=False)

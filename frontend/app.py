@@ -5,7 +5,7 @@ from components.chat_ui import chatbot_ui
 import openai
 import plotly.express as px
 import pandas as pd
-from datetime import datetime
+from datetime import datetime, timedelta
 from streamlit_option_menu import option_menu
 from textblob import TextBlob
 import requests
@@ -184,15 +184,26 @@ elif selected == "🔧 Admin":
         # Filter by date
         st.subheader("📅 Filter Conversations")
         date_range = st.slider("Select Date Range", 
-                              min_value=df["timestamp"].min().date(), 
-                              max_value=df["timestamp"].max().date(), 
-                              value=(df["timestamp"].min().date(), df["timestamp"].max().date()),
+                              min_value=df["timestamp"].min().date() - timedelta(days=1), 
+                              max_value=df["timestamp"].max().date() + timedelta(days=5), 
+                              value=(df["timestamp"].min().date() - timedelta(days=1), df["timestamp"].max().date() + timedelta(days=5)),
                               format="YYYY-MM-DD")
         filtered_df = df[df["timestamp"].dt.date.between(date_range[0], date_range[1])]
         
         # Conversation table
         st.subheader("📋 Recent Conversations")
         st.dataframe(filtered_df[["timestamp", "user", "bot"]], use_container_width=True)
+        # # Show as a table with truncated 'bot' message (one-liner)
+        # preview_df = filtered_df.copy()
+        # preview_df["bot_preview"] = preview_df["bot"].str.split('\n').str[0].str.slice(0, 80) + "..."
+        # st.dataframe(preview_df[["timestamp", "user", "bot_preview"]], use_container_width=True)
+
+        # st.write("------")
+
+        # # Expandable full message per row
+        # for idx, row in filtered_df.iterrows():
+        #     with st.expander(f"{row['timestamp']} - {row['user']} (Show full bot message)"):
+        #         st.markdown(row["bot"])
         
         # Download button
         csv = filtered_df.to_csv(index=False)

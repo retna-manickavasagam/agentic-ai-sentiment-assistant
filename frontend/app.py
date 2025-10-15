@@ -6,6 +6,7 @@ import openai
 import plotly.express as px
 import pandas as pd
 from datetime import datetime, timedelta
+from datetime import datetime, timedelta
 from streamlit_option_menu import option_menu
 from textblob import TextBlob
 import requests
@@ -20,6 +21,7 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded"
 )
+
 # FastAPI backend URL
 API_BASE_URL = "http://localhost:8000/api"
 
@@ -32,12 +34,14 @@ st.markdown("""
         text-align: center; 
         margin-bottom: 1.5rem;
         text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        font-family: 'Poppins', sans-serif;
     }
     .chat-container {
         background: linear-gradient(135deg, #6B7280 0%, #4B5563 100%); 
         padding: 2rem; 
         border-radius: 15px;
         box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        font-family: 'Poppins', sans-serif;
     }
     .admin-container {
         background: linear-gradient(135deg, #FCD34D 0%, #F59E0B 100%); 
@@ -114,9 +118,9 @@ if "chat_history" not in st.session_state:
 
 # Page: Chatbot
 if selected == "💬 Chat":
-    st.markdown('<h1 class="main-header">🤖 Sent AI Shopping Assistant</h1>', unsafe_allow_html=True)
-    st.markdown('<div class="chat-container">', unsafe_allow_html=True)
-    
+    st.markdown('<h1 class="main-header">🤖 ShopSense Shopping Assistant</h1>', unsafe_allow_html=True)
+    st.markdown('<div class="chat-container chat-area">', unsafe_allow_html=True)
+    st.write(" ")
     # Display chat history
     for i, msg in enumerate(st.session_state.messages):
         message(msg["content"], is_user=msg["is_user"], key=f"msg_{i}")
@@ -133,6 +137,7 @@ if selected == "💬 Chat":
                     url = "http://localhost:8001/api/chat"    # <-- Update port if needed
                     print(prompt)
                     payload = {"message": prompt}
+                    res = requests.post(url, json=payload, timeout=60)
                     # response = openai.ChatCompletion.create(
                     #     model="gpt-3.5-turbo",
                     #     messages=[
@@ -153,7 +158,7 @@ if selected == "💬 Chat":
                         "bot": bot_reply
                     })
                 except Exception as e:
-                    st.error(f"🤖 Oops! Error: {e}")
+                    st.error("🤖 Sorry, the Sent AI assistant is temporarily unavailable.\n\nPlease try again in a few minutes.\n\n.Thank you for your patience!")
     
     # Clear chat button
     if st.button("🗑️ Clear Chat", key="clear_chat"):

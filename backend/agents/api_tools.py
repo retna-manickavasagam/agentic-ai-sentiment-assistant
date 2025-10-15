@@ -18,7 +18,6 @@ def retrieve_product(user_query: str):
     Retrieve product information using a natural language user query.
     Takes a user query string and returns product_id, product_name, and relevant data from the API.
     """
-    print('inside product tool')
     payload = {"query": user_query, "k": 3}
     url = API_URL + PRODUCT_URL
     try:

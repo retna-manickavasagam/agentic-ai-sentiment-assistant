@@ -15,7 +15,7 @@ from streamlit_chat import message
 
 # Set page config for wide layout and robot favicon
 st.set_page_config(
-    page_title="ShopSense AI",
+    page_title="Sent AI",
     page_icon="🤖",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -117,7 +117,7 @@ if "chat_history" not in st.session_state:
 
 # Page: Chatbot
 if selected == "💬 Chat":
-    st.markdown('<h1 class="main-header">🤖 ShopSense AI</h1>', unsafe_allow_html=True)
+    st.markdown('<h1 class="main-header">🤖 ShopSense Shopping Assistant</h1>', unsafe_allow_html=True)
     st.markdown('<div class="chat-container chat-area">', unsafe_allow_html=True)
     st.write(" ")
     # Display chat history

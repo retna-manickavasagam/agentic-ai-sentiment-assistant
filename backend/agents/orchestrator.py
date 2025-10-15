@@ -1,12 +1,11 @@
 from .memory import ConversationMemory
 from .api_tools import retrieve_product, retrieve_review_by_id,retrieve_review_by_name, order_product, add_review_tool, send_email
 from textblob import TextBlob
-from rapidfuzz import fuzz
-import json
+import json, re
 
 memory = ConversationMemory()
 
-
+EMAIL_REGEX = r'[\w\.-]+@[\w\.-]+\.\w+'
 
 def get_review_rating(msg):
     print('reg_review_rating')
@@ -98,6 +97,18 @@ def handle_user_message(user_message, agent):
             return f"Product {product_name} review added successfully!"
         
     if ("send email" in lower or "email me" in lower):
+        email_matches = re.findall(EMAIL_REGEX, user_message)
+        print(email_matches)
+        if email_matches:
+            user_email = email_matches[0]
+            memory.set("user_email", user_email)
+            memory.set("awaiting_email", False)
+            if last_order:
+                subject = "Your Agentic AI Order"
+                body = f"Order ID: {last_order.get('order_id')}\nThank you for your order!"
+                email_resp = send_email({"params": {"to_email": memory.get("user_email"),"subject": subject,"body": body}})
+            return f"I've sent your order details to {user_email}! Please check your inbox."
+       
         if not user_email:
             memory.set("awaiting_email", True)
             return "Please provide your email address so I can send your order details."
@@ -110,7 +121,7 @@ def handle_user_message(user_message, agent):
                 "Thank you for your order!"
             )
             #body="Test Email"
-            email_resp = send_email({"to_email": user_email, "subject": subject, "body": body})
+            email_resp = send_email({"params": {"to_email": memory.get("user_email"),"subject": subject,"body": body}})
             return email_resp
         
          # Prompt for email entry
@@ -118,8 +129,8 @@ def handle_user_message(user_message, agent):
         if "@" in user_message and "." in user_message:
             memory.set("user_email", user_message.strip())
             memory.set("awaiting_email", False)
-            #if last_order:
-            if 1==1:
+            if last_order:
+            #if 1==1:
                 subject = "Your Agentic AI Order"
                 body = (
                 f"Order ID: {last_order.get('order_id')}\n"
@@ -127,14 +138,36 @@ def handle_user_message(user_message, agent):
             )
                 #body="Test Email"
                 email_resp = send_email({"params": {"to_email": memory.get("user_email"),"subject": subject,"body": body}})
-                return email_resp
-            #else:
-             #   return "No recent order to email."
+                return f"I've sent your order details to {user_email}! Please check your inbox."
+            else:
+                return "No recent order to email."
         else:
             return "That doesn't look like a valid email address. Please try again."
 
     # Generic fallback
-    return agent.run(user_message)
+    print('fallback')
+    try:
+        # Give agent access to current context
+            context = {
+                "product_id": memory.get("product_id"),
+                "product_name": memory.get("product_name"), 
+                "user_email": memory.get("user_email"),
+                "last_order": memory.get("last_order")
+            }
+        
+        # Create enriched prompt with context
+            enriched_message = f"""
+                User message: {user_message}
+                Current context: {context}
+        
+                Use the available tools to help the user. If no tool fits their request, 
+                politely explain you can only help with products, reviews, orders, and emails.
+            """
+        
+            return agent.run(enriched_message)
+        
+    except Exception as e:
+            return "I can help with product recommendations, reviews, orders, and email. What would you like to explore?"
 
 
 def summarize_reviews(review_response):
